@@ -78,39 +78,39 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-financial-navy via-financial-dark to-financial-midnight flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-card-secondary to-background flex items-center justify-center p-6">
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
           <Button 
             variant="ghost" 
             onClick={() => navigate('/')}
-            className="text-financial-silver hover:text-financial-blue mb-4"
+            className="text-muted-foreground hover:text-accent mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
           </Button>
-          <h1 className="text-3xl font-bold text-financial-silver">Welcome to Scout</h1>
-          <p className="text-financial-silver/70">
+          <h1 className="text-3xl font-bold text-foreground">Welcome to Scout</h1>
+          <p className="text-muted-foreground">
             Access your institutional-level portfolio coverage
           </p>
         </div>
 
         {/* Auth Tabs */}
-        <Card className="bg-financial-dark/50 border-financial-silver/20 shadow-financial-elegant">
+        <Card className="bg-card border-border shadow-card">
           <CardHeader>
-            <CardTitle className="text-financial-silver text-center">Get Started</CardTitle>
-            <CardDescription className="text-financial-silver/70 text-center">
+            <CardTitle className="text-center">Get Started</CardTitle>
+            <CardDescription className="text-center">
               Sign in to your account or create a new one
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-financial-navy/30">
-                <TabsTrigger value="signin" className="data-[state=active]:bg-financial-blue data-[state=active]:text-white">
+              <TabsList className="grid w-full grid-cols-2 bg-muted">
+                <TabsTrigger value="signin" className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
                   Sign In
                 </TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-financial-blue data-[state=active]:text-white">
+                <TabsTrigger value="signup" className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
                   Sign Up
                 </TabsTrigger>
               </TabsList>
@@ -118,7 +118,7 @@ const Auth = () => {
               <TabsContent value="signin" className="space-y-4 mt-6">
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email" className="text-financial-silver">
+                    <Label htmlFor="signin-email">
                       <Mail className="h-4 w-4 inline mr-2" />
                       Email
                     </Label>
@@ -128,12 +128,11 @@ const Auth = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="bg-financial-navy/30 border-financial-silver/30 text-financial-silver focus:border-financial-blue"
                       placeholder="Enter your email"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password" className="text-financial-silver">
+                    <Label htmlFor="signin-password">
                       <Lock className="h-4 w-4 inline mr-2" />
                       Password
                     </Label>
@@ -143,14 +142,14 @@ const Auth = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="bg-financial-navy/30 border-financial-silver/30 text-financial-silver focus:border-financial-blue"
                       placeholder="Enter your password"
                     />
                   </div>
                   <Button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-financial-blue hover:bg-financial-blue/80 text-white"
+                    className="w-full"
+                    variant="hero"
                   >
                     {loading ? 'Signing in...' : 'Sign In'}
                   </Button>
@@ -160,7 +159,7 @@ const Auth = () => {
               <TabsContent value="signup" className="space-y-4 mt-6">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-financial-silver">
+                    <Label htmlFor="signup-email">
                       <Mail className="h-4 w-4 inline mr-2" />
                       Email
                     </Label>
@@ -170,12 +169,11 @@ const Auth = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="bg-financial-navy/30 border-financial-silver/30 text-financial-silver focus:border-financial-blue"
                       placeholder="Enter your email"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-financial-silver">
+                    <Label htmlFor="signup-password">
                       <Lock className="h-4 w-4 inline mr-2" />
                       Password
                     </Label>
@@ -185,14 +183,14 @@ const Auth = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="bg-financial-navy/30 border-financial-silver/30 text-financial-silver focus:border-financial-blue"
                       placeholder="Choose a password"
                     />
                   </div>
                   <Button 
                     type="submit" 
                     disabled={loading}
-                    className="w-full bg-financial-blue hover:bg-financial-blue/80 text-white"
+                    className="w-full"
+                    variant="hero"
                   >
                     {loading ? 'Creating account...' : 'Sign Up'}
                   </Button>

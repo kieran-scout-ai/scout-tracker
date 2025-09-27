@@ -128,59 +128,60 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-financial-navy via-financial-dark to-financial-midnight flex items-center justify-center">
-        <div className="animate-pulse text-financial-silver">Loading your dashboard...</div>
+      <div className="min-h-screen bg-gradient-to-br from-background via-card-secondary to-background flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading your dashboard...</div>
       </div>
     );
   }
 
   if (portfolios.length === 0) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-financial-navy via-financial-dark to-financial-midnight">
-        <header className="border-b border-financial-silver/20 bg-financial-navy/50 backdrop-blur-sm">
-          <div className="px-6 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-financial-silver">Scout Dashboard</h1>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-financial-silver hover:text-financial-blue">
-                  <User className="h-4 w-4 mr-2" />
-                  Account
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </header>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-card-secondary to-background">
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm">
+        <div className="px-6 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-foreground">Scout Dashboard</h1>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-accent">
+                <User className="h-4 w-4 mr-2" />
+                Account
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="bg-card border-border">
+              <DropdownMenuItem onClick={handleSignOut} className="text-destructive hover:bg-destructive/10">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </header>
 
-        <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
-          <div className="text-center space-y-6 max-w-md">
-            <FileText className="h-16 w-16 text-financial-blue mx-auto" />
-            <h2 className="text-2xl font-bold text-financial-silver">No Portfolios Yet</h2>
-            <p className="text-financial-silver/70">
-              Get started by creating your first portfolio to receive tailored market coverage.
-            </p>
-            <Button 
-              onClick={() => navigate('/upload')} 
-              className="bg-financial-blue hover:bg-financial-blue/80 text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Portfolio
-            </Button>
-          </div>
+      <div className="flex items-center justify-center min-h-[calc(100vh-80px)]">
+        <div className="text-center space-y-6 max-w-md">
+          <FileText className="h-16 w-16 text-accent mx-auto" />
+          <h2 className="text-2xl font-bold text-foreground">No Portfolios Yet</h2>
+          <p className="text-muted-foreground">
+            Get started by creating your first portfolio to receive tailored market coverage.
+          </p>
+          <Button 
+            onClick={() => navigate('/upload')} 
+            variant="hero"
+            size="lg"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create Portfolio
+          </Button>
         </div>
       </div>
-    );
+    </div>
+  );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-financial-navy via-financial-dark to-financial-midnight">
+    <div className="min-h-screen bg-gradient-to-br from-background via-card-secondary to-background">
       {/* Header */}
-      <header className="border-b border-financial-silver/20 bg-financial-navy/50 backdrop-blur-sm">
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <PortfolioSelector 
@@ -194,14 +195,14 @@ const Dashboard = () => {
             {selectedPortfolio && (
               <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="text-financial-silver border-financial-silver/30 hover:bg-financial-silver/10">
+                  <Button variant="outline" size="sm">
                     <Settings className="h-4 w-4 mr-2" />
                     Portfolio Settings
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-financial-dark border-financial-silver/20 text-financial-silver max-w-2xl">
+                <DialogContent className="bg-card border-border max-w-2xl">
                   <DialogHeader>
-                    <DialogTitle className="text-financial-silver">Portfolio Settings</DialogTitle>
+                    <DialogTitle>Portfolio Settings</DialogTitle>
                   </DialogHeader>
                   <PortfolioSettings 
                     portfolio={selectedPortfolio}
@@ -213,9 +214,8 @@ const Dashboard = () => {
 
             <Button 
               onClick={() => navigate('/upload')} 
-              variant="secondary"
+              variant="hero"
               size="sm"
-              className="bg-financial-blue hover:bg-financial-blue/80 text-white"
             >
               <Plus className="h-4 w-4 mr-2" />
               New Portfolio
@@ -223,13 +223,13 @@ const Dashboard = () => {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-financial-silver hover:text-financial-blue">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-accent">
                   <User className="h-4 w-4 mr-2" />
                   Account
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+              <DropdownMenuContent className="bg-card border-border">
+                <DropdownMenuItem onClick={handleSignOut} className="text-destructive hover:bg-destructive/10">
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign out
                 </DropdownMenuItem>
@@ -249,7 +249,7 @@ const Dashboard = () => {
           />
         ) : (
           <div className="text-center py-12">
-            <p className="text-financial-silver/70">Select a portfolio to view its latest recap</p>
+            <p className="text-muted-foreground">Select a portfolio to view its latest recap</p>
           </div>
         )}
       </main>

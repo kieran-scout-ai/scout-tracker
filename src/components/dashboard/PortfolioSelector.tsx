@@ -24,7 +24,7 @@ export const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
 }) => {
   return (
     <div className="flex items-center space-x-3">
-      <Briefcase className="h-5 w-5 text-financial-blue" />
+      <Briefcase className="h-5 w-5 text-accent" />
       <Select 
         value={selectedPortfolio?.id || ''} 
         onValueChange={(value) => {
@@ -32,30 +32,30 @@ export const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
           if (portfolio) onPortfolioSelect(portfolio);
         }}
       >
-        <SelectTrigger className="w-64 bg-financial-dark/50 border-financial-silver/30 text-financial-silver focus:border-financial-blue">
+        <SelectTrigger className="w-64 bg-card border-border focus:border-accent">
           <SelectValue placeholder="Select a portfolio">
             {selectedPortfolio && (
               <div className="flex items-center space-x-2">
-                <Briefcase className="h-4 w-4 text-financial-blue" />
+                <Briefcase className="h-4 w-4 text-accent" />
                 <span className="truncate">{selectedPortfolio.name}</span>
               </div>
             )}
           </SelectValue>
         </SelectTrigger>
-        <SelectContent className="bg-financial-dark border-financial-silver/20">
+        <SelectContent className="bg-card border-border z-50">
           {portfolios.map((portfolio) => (
             <SelectItem 
               key={portfolio.id} 
               value={portfolio.id}
-              className="text-financial-silver hover:bg-financial-navy/50 focus:bg-financial-navy/50"
+              className="hover:bg-accent/10 focus:bg-accent/10"
             >
               <div className="flex flex-col">
                 <div className="flex items-center space-x-2">
-                  <Briefcase className="h-4 w-4 text-financial-blue" />
+                  <Briefcase className="h-4 w-4 text-accent" />
                   <span className="font-medium">{portfolio.name}</span>
                 </div>
                 {portfolio.description && (
-                  <span className="text-xs text-financial-silver/70 mt-1">
+                  <span className="text-xs text-muted-foreground mt-1">
                     {portfolio.description}
                   </span>
                 )}
