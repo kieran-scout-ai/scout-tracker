@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Mail, Clock, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
+import { Mail, Clock, AlertCircle, Sparkles, Loader2, Upload } from 'lucide-react';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -35,6 +36,27 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
   onRecapGenerated
 }) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [hasHoldings, setHasHoldings] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    checkHoldings();
+  }, [portfolio.id]);
+
+  const checkHoldings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('portfolio_holdings')
+        .select('id')
+        .eq('portfolio_id', portfolio.id)
+        .limit(1);
+
+      if (error) throw error;
+      setHasHoldings(data && data.length > 0);
+    } catch (error) {
+      console.error('Error checking holdings:', error);
+    }
+  };
 
   const generateRecap = async () => {
     setIsGenerating(true);
@@ -95,30 +117,43 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
               <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto" />
               <div>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
-                  No Email Recaps Yet
+                  {hasHoldings ? "No Email Recaps Yet" : "No Portfolio Holdings"}
                 </h3>
                 <p className="text-muted-foreground max-w-md mx-auto">
-                  Generate your first {portfolio.email_frequency} recap based on your portfolio holdings and preferences.
+                  {hasHoldings 
+                    ? `Generate your first ${portfolio.email_frequency} recap based on your portfolio holdings and preferences.`
+                    : "Upload your portfolio holdings to start receiving personalized market recaps and insights."
+                  }
                 </p>
               </div>
               
-              <Button 
-                onClick={generateRecap}
-                disabled={isGenerating}
-                className="bg-accent hover:bg-accent/80 text-accent-foreground"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Generating Recap...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Generate First Recap
-                  </>
-                )}
-              </Button>
+              {hasHoldings ? (
+                <Button 
+                  onClick={generateRecap}
+                  disabled={isGenerating}
+                  className="bg-accent hover:bg-accent/80 text-accent-foreground"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Generating Recap...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Generate First Recap
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button 
+                  onClick={() => navigate('/upload')}
+                  className="bg-accent hover:bg-accent/80 text-accent-foreground"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Portfolio Holdings
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -79,49 +79,51 @@ const Upload = () => {
 
       if (portfolioError) throw portfolioError;
 
-      // If there's a file, upload and process it
-      if (file && portfolio) {
-        setUploadingFile(true);
-        
-        // Upload file to storage
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${portfolio.id}.${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('portfolios')
-          .upload(fileName, file);
+      // Upload and process the required file
+      if (!file) {
+        throw new Error("Portfolio file is required");
+      }
 
-        if (uploadError) throw uploadError;
+      setUploadingFile(true);
+      
+      // Upload file to storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${portfolio.id}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('portfolios')
+        .upload(fileName, file);
 
-        // Update portfolio with file path
-        const { error: updateError } = await supabase
-          .from('portfolios')
-          .update({ file_path: fileName })
-          .eq('id', portfolio.id);
+      if (uploadError) throw uploadError;
 
-        if (updateError) throw updateError;
+      // Update portfolio with file path
+      const { error: updateError } = await supabase
+        .from('portfolios')
+        .update({ file_path: fileName })
+        .eq('id', portfolio.id);
 
-        // Process the uploaded file
-        const { error: processError } = await supabase.functions.invoke('process-portfolio-file', {
-          body: { 
-            portfolio_id: portfolio.id,
-            file_path: fileName
-          }
-        });
+      if (updateError) throw updateError;
 
-        if (processError) {
-          console.error('Processing error:', processError);
-          toast({
-            title: "File uploaded but processing failed",
-            description: "Your portfolio was created but the file couldn't be processed. You can try uploading again later.",
-            variant: "destructive"
-          });
+      // Process the uploaded file
+      const { error: processError } = await supabase.functions.invoke('process-portfolio-file', {
+        body: { 
+          portfolio_id: portfolio.id,
+          file_path: fileName
         }
+      });
+
+      if (processError) {
+        console.error('Processing error:', processError);
+        toast({
+          title: "File uploaded but processing failed",
+          description: "Your portfolio was created but the file couldn't be processed. You can try uploading again later.",
+          variant: "destructive"
+        });
       }
 
       toast({
         title: "Portfolio created!",
-        description: file ? "Your portfolio and spreadsheet have been uploaded successfully." : "Your portfolio has been successfully created.",
+        description: "Your portfolio and spreadsheet have been uploaded successfully.",
       });
 
       navigate('/dashboard');
@@ -197,7 +199,7 @@ const Upload = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="portfolioFile">Portfolio Spreadsheet (Optional)</Label>
+                <Label htmlFor="portfolioFile">Portfolio Spreadsheet *</Label>
                 <div className="flex items-center space-x-4">
                   <Input
                     id="portfolioFile"
@@ -205,6 +207,7 @@ const Upload = () => {
                     onChange={handleFileChange}
                     accept=".xlsx,.xls,.csv"
                     className="flex-1"
+                    required
                   />
                   {file && (
                     <div className="flex items-center space-x-2 text-sm text-muted-foreground">
@@ -244,7 +247,7 @@ const Upload = () => {
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={loading || uploadingFile || !formData.name || !formData.emailInstructions}
+                  disabled={loading || uploadingFile || !formData.name || !formData.emailInstructions || !file}
                   className="flex-1"
                 >
                   {uploadingFile ? (
