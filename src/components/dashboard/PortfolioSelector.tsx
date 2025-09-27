@@ -1,6 +1,5 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Briefcase } from 'lucide-react';
 
 interface PortfolioData {
   id: string;
@@ -24,7 +23,6 @@ export const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
 }) => {
   return (
     <div className="flex items-center space-x-3">
-      <Briefcase className="h-5 w-5 text-accent" />
       <Select 
         value={selectedPortfolio?.id || ''} 
         onValueChange={(value) => {
@@ -36,7 +34,6 @@ export const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
           <SelectValue placeholder="Select a portfolio">
             {selectedPortfolio && (
               <div className="flex items-center space-x-2">
-                <Briefcase className="h-4 w-4 text-accent" />
                 <span className="truncate">{selectedPortfolio.name}</span>
               </div>
             )}
@@ -51,7 +48,6 @@ export const PortfolioSelector: React.FC<PortfolioSelectorProps> = ({
             >
               <div className="flex flex-col">
                 <div className="flex items-center space-x-2">
-                  <Briefcase className="h-4 w-4 text-accent" />
                   <span className="font-medium">{portfolio.name}</span>
                 </div>
                 {portfolio.description && (
