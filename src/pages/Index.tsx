@@ -22,10 +22,16 @@ const Index = () => {
             <Button variant="ghost" className="hidden md:inline-flex">
               Pricing
             </Button>
-            <Button variant="outline">
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = '/auth'}
+            >
               Sign In
             </Button>
-            <Button variant="hero">
+            <Button 
+              variant="hero"
+              onClick={() => window.location.href = '/auth'}
+            >
               Get Started
             </Button>
           </div>
@@ -49,11 +55,21 @@ const Index = () => {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button variant="hero" size="lg" className="text-lg px-8 py-4">
+                <Button 
+                  variant="hero" 
+                  size="lg" 
+                  className="text-lg px-8 py-4"
+                  onClick={() => window.location.href = '/auth'}
+                >
                   Upload Portfolio
                   <Upload className="w-5 h-5" />
                 </Button>
-                <Button variant="outline" size="lg" className="text-lg px-8 py-4">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="text-lg px-8 py-4"
+                  onClick={() => window.location.href = '/auth'}
+                >
                   View Demo
                   <TrendingUp className="w-5 h-5" />
                 </Button>
@@ -185,11 +201,21 @@ const Index = () => {
             Join thousands of investors who trust Scout for professional-grade portfolio insights.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="hero" size="lg" className="text-lg px-8 py-4">
+            <Button 
+              variant="hero" 
+              size="lg" 
+              className="text-lg px-8 py-4"
+              onClick={() => window.location.href = '/auth'}
+            >
               Start Your Free Trial
               <Upload className="w-5 h-5" />
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-4">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="text-lg px-8 py-4"
+              onClick={() => window.location.href = '/auth'}
+            >
               Schedule Demo
             </Button>
           </div>
