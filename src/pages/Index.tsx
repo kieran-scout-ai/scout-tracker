@@ -17,9 +17,9 @@ const Index = () => {
           <div className="flex items-center space-x-4">
             <Button 
               variant="outline" 
-              onClick={() => window.location.href = '/auth'}
+              onClick={() => window.location.href = '/pricing'}
             >
-              Sign In
+              Pricing
             </Button>
             <Button 
               variant="hero"
@@ -55,7 +55,7 @@ const Index = () => {
                   className="text-lg px-8 py-4"
                   onClick={() => window.location.href = '/auth'}
                 >
-                  Upload Portfolio
+                  Get Started
                   <Upload className="w-5 h-5" />
                 </Button>
                 <Button 
@@ -64,7 +64,7 @@ const Index = () => {
                   className="text-lg px-8 py-4"
                   onClick={() => window.location.href = '/auth'}
                 >
-                  View Demo
+                  Sign In
                 </Button>
               </div>
             </div>
