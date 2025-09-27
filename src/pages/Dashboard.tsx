@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { PortfolioSelector } from '@/components/dashboard/PortfolioSelector';
 import { EmailRecapDisplay } from '@/components/dashboard/EmailRecapDisplay';
 import { PortfolioSettings } from '@/components/dashboard/PortfolioSettings';
+import { PortfolioHoldings } from '@/components/dashboard/PortfolioHoldings';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
@@ -242,11 +243,18 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="p-6">
         {selectedPortfolio ? (
-          <EmailRecapDisplay 
-            portfolio={selectedPortfolio}
-            latestRecap={latestRecap}
-            onRecapGenerated={fetchLatestRecap}
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <EmailRecapDisplay 
+                portfolio={selectedPortfolio}
+                latestRecap={latestRecap}
+                onRecapGenerated={fetchLatestRecap}
+              />
+            </div>
+            <div className="lg:col-span-1">
+              <PortfolioHoldings portfolioId={selectedPortfolio.id} />
+            </div>
+          </div>
         ) : (
           <div className="text-center py-12">
             <p className="text-muted-foreground">Select a portfolio to view its latest recap</p>

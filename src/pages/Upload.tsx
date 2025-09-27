@@ -7,11 +7,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { Upload as UploadIcon, ArrowLeft, FileSpreadsheet } from 'lucide-react';
+import { Upload as UploadIcon, ArrowLeft, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
 
 const Upload = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -32,6 +34,29 @@ const Upload = () => {
     setUser(session.user);
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      const fileType = selectedFile.type;
+      const fileName = selectedFile.name.toLowerCase();
+      
+      // Check if it's a valid spreadsheet file
+      if (fileType.includes('spreadsheet') || 
+          fileType.includes('excel') || 
+          fileName.endsWith('.xlsx') || 
+          fileName.endsWith('.xls') || 
+          fileName.endsWith('.csv')) {
+        setFile(selectedFile);
+      } else {
+        toast({
+          title: "Invalid file type",
+          description: "Please upload a valid spreadsheet file (.xlsx, .xls, or .csv)",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -39,7 +64,8 @@ const Upload = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase
+      // Create portfolio first
+      const { data: portfolio, error: portfolioError } = await supabase
         .from('portfolios')
         .insert({
           user_id: user.id,
@@ -47,13 +73,55 @@ const Upload = () => {
           description: formData.description || null,
           email_instructions: formData.emailInstructions,
           email_frequency: 'weekly'
+        })
+        .select()
+        .single();
+
+      if (portfolioError) throw portfolioError;
+
+      // If there's a file, upload and process it
+      if (file && portfolio) {
+        setUploadingFile(true);
+        
+        // Upload file to storage
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${portfolio.id}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('portfolios')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        // Update portfolio with file path
+        const { error: updateError } = await supabase
+          .from('portfolios')
+          .update({ file_path: fileName })
+          .eq('id', portfolio.id);
+
+        if (updateError) throw updateError;
+
+        // Process the uploaded file
+        const { error: processError } = await supabase.functions.invoke('process-portfolio-file', {
+          body: { 
+            portfolio_id: portfolio.id,
+            file_path: fileName
+          }
         });
 
-      if (error) throw error;
+        if (processError) {
+          console.error('Processing error:', processError);
+          toast({
+            title: "File uploaded but processing failed",
+            description: "Your portfolio was created but the file couldn't be processed. You can try uploading again later.",
+            variant: "destructive"
+          });
+        }
+      }
 
       toast({
         title: "Portfolio created!",
-        description: "Your portfolio has been successfully created.",
+        description: file ? "Your portfolio and spreadsheet have been uploaded successfully." : "Your portfolio has been successfully created.",
       });
 
       navigate('/dashboard');
@@ -65,6 +133,7 @@ const Upload = () => {
       });
     } finally {
       setLoading(false);
+      setUploadingFile(false);
     }
   };
 
@@ -128,6 +197,28 @@ const Upload = () => {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="portfolioFile">Portfolio Spreadsheet (Optional)</Label>
+                <div className="flex items-center space-x-4">
+                  <Input
+                    id="portfolioFile"
+                    type="file"
+                    onChange={handleFileChange}
+                    accept=".xlsx,.xls,.csv"
+                    className="flex-1"
+                  />
+                  {file && (
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                      <FileText className="h-4 w-4" />
+                      <span>{file.name}</span>
+                    </div>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Upload a spreadsheet (.xlsx, .xls, or .csv) with your portfolio holdings. The file will be validated against our security master database.
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="emailInstructions">Email Recap Instructions *</Label>
                 <Textarea
                   id="emailInstructions"
@@ -153,10 +244,19 @@ const Upload = () => {
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={loading || !formData.name || !formData.emailInstructions}
+                  disabled={loading || uploadingFile || !formData.name || !formData.emailInstructions}
                   className="flex-1"
                 >
-                  {loading ? 'Creating...' : 'Create Portfolio'}
+                  {uploadingFile ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Processing File...
+                    </>
+                  ) : loading ? (
+                    'Creating...'
+                  ) : (
+                    'Create Portfolio'
+                  )}
                 </Button>
               </div>
             </form>

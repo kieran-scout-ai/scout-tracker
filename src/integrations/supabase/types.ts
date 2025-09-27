@@ -49,6 +49,62 @@ export type Database = {
           },
         ]
       }
+      portfolio_holdings: {
+        Row: {
+          created_at: string
+          id: string
+          market_value: number | null
+          name: string | null
+          portfolio_id: string
+          price: number | null
+          quantity: number | null
+          sector: string | null
+          symbol: string
+          updated_at: string
+          validated: boolean | null
+          validation_status: string | null
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          market_value?: number | null
+          name?: string | null
+          portfolio_id: string
+          price?: number | null
+          quantity?: number | null
+          sector?: string | null
+          symbol: string
+          updated_at?: string
+          validated?: boolean | null
+          validation_status?: string | null
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          market_value?: number | null
+          name?: string | null
+          portfolio_id?: string
+          price?: number | null
+          quantity?: number | null
+          sector?: string | null
+          symbol?: string
+          updated_at?: string
+          validated?: boolean | null
+          validation_status?: string | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_holdings_portfolio_id_fkey"
+            columns: ["portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portfolios: {
         Row: {
           created_at: string
