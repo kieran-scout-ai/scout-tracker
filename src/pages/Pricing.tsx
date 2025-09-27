@@ -67,12 +67,7 @@ const Pricing = () => {
       {/* Navigation */}
       <nav className="container mx-auto px-6 py-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <ScoutLogo />
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Scout
-            </span>
-          </div>
+          <ScoutLogo size="md" showText={true} />
           <div className="flex items-center space-x-4">
             <Button 
               variant="ghost" 
@@ -94,10 +89,10 @@ const Pricing = () => {
 
       {/* Header */}
       <section className="container mx-auto px-6 py-16 text-center">
-        <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary-light bg-clip-text text-transparent">
+        <h1 className="text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-primary via-accent to-primary-light bg-clip-text text-transparent">
           Simple, Transparent Pricing
         </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mt-4">
           Choose the perfect plan for your portfolio management needs. All plans include our core features with scalable limits.
         </p>
       </section>
@@ -128,7 +123,9 @@ const Pricing = () => {
                   {plan.description}
                 </CardDescription>
                 <div className="flex items-baseline space-x-1 pt-4">
-                  <span className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  <span className={`font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent ${
+                    plan.price === 'Custom' ? 'text-2xl' : 'text-4xl'
+                  }`}>
                     {plan.price}
                   </span>
                   <span className="text-muted-foreground">{plan.period}</span>
