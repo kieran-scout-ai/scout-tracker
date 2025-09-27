@@ -66,37 +66,38 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
       setIsGenerating(false);
     }
   };
+
   if (!latestRecap) {
     return (
       <div className="max-w-4xl mx-auto">
-        <Card className="bg-financial-dark/30 border-financial-silver/20">
+        <Card className="bg-card/50 border-border">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-financial-silver flex items-center space-x-2">
-                  <Mail className="h-5 w-5 text-financial-blue" />
+                <CardTitle className="text-foreground flex items-center space-x-2">
+                  <Mail className="h-5 w-5 text-accent" />
                   <span>{portfolio.name}</span>
                 </CardTitle>
-                <CardDescription className="text-financial-silver/70 mt-2">
+                <CardDescription className="text-muted-foreground mt-2">
                   {portfolio.description || 'No description provided'}
                 </CardDescription>
               </div>
               <Badge 
                 variant="outline" 
-                className="text-financial-blue border-financial-blue/50 bg-financial-blue/10"
+                className="text-accent border-accent/50 bg-accent/10"
               >
-                {portfolio.email_frequency} updates
+                {portfolio.email_frequency.charAt(0).toUpperCase() + portfolio.email_frequency.slice(1)} Updates
               </Badge>
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-center py-12 space-y-4">
-              <AlertCircle className="h-12 w-12 text-financial-silver/50 mx-auto" />
+              <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto" />
               <div>
-                <h3 className="text-lg font-semibold text-financial-silver mb-2">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                   No Email Recaps Yet
                 </h3>
-                <p className="text-financial-silver/70 max-w-md mx-auto">
+                <p className="text-muted-foreground max-w-md mx-auto">
                   Generate your first {portfolio.email_frequency} recap based on your portfolio holdings and preferences.
                 </p>
               </div>
@@ -104,7 +105,7 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
               <Button 
                 onClick={generateRecap}
                 disabled={isGenerating}
-                className="bg-financial-blue hover:bg-financial-blue/80 text-white"
+                className="bg-accent hover:bg-accent/80 text-accent-foreground"
               >
                 {isGenerating ? (
                   <>
@@ -118,13 +119,6 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
                   </>
                 )}
               </Button>
-
-              {portfolio.email_instructions && (
-                <div className="mt-6 p-4 bg-financial-navy/30 rounded-lg border border-financial-silver/10">
-                  <h4 className="text-sm font-medium text-financial-silver mb-2">Your Instructions:</h4>
-                  <p className="text-sm text-financial-silver/80">{portfolio.email_instructions}</p>
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
@@ -135,26 +129,26 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Portfolio Header */}
-      <Card className="bg-financial-dark/30 border-financial-silver/20">
+      <Card className="bg-card/50 border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-financial-silver flex items-center space-x-2">
-                <Mail className="h-5 w-5 text-financial-blue" />
+              <CardTitle className="text-foreground flex items-center space-x-2">
+                <Mail className="h-5 w-5 text-accent" />
                 <span>{portfolio.name}</span>
               </CardTitle>
-              <CardDescription className="text-financial-silver/70 mt-2">
+              <CardDescription className="text-muted-foreground mt-2">
                 {portfolio.description || 'No description provided'}
               </CardDescription>
             </div>
             <div className="flex items-center space-x-3">
               <Badge 
                 variant="outline" 
-                className="text-financial-blue border-financial-blue/50 bg-financial-blue/10"
+                className="text-accent border-accent/50 bg-accent/10"
               >
-                {portfolio.email_frequency} updates
+                {portfolio.email_frequency.charAt(0).toUpperCase() + portfolio.email_frequency.slice(1)} Updates
               </Badge>
-              <div className="flex items-center text-sm text-financial-silver/70">
+              <div className="flex items-center text-sm text-muted-foreground">
                 <Clock className="h-4 w-4 mr-1" />
                 Last update: {format(new Date(latestRecap.sent_at), 'MMM d, yyyy')}
               </div>
@@ -164,14 +158,14 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
       </Card>
 
       {/* Latest Email Recap */}
-      <Card className="bg-financial-dark/30 border-financial-silver/20">
+      <Card className="bg-card/50 border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-financial-silver text-xl">
+              <CardTitle className="text-foreground text-xl">
                 {latestRecap.subject}
               </CardTitle>
-              <CardDescription className="text-financial-silver/70">
+              <CardDescription className="text-muted-foreground">
                 Sent on {format(new Date(latestRecap.sent_at), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
               </CardDescription>
             </div>
@@ -180,7 +174,7 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
               disabled={isGenerating}
               variant="outline"
               size="sm"
-              className="text-financial-blue border-financial-blue/50 hover:bg-financial-blue/10"
+              className="text-accent border-accent/50 hover:bg-accent/10"
             >
               {isGenerating ? (
                 <>
@@ -198,33 +192,17 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
         </CardHeader>
         <CardContent>
           <div 
-            className="prose prose-invert max-w-none text-financial-silver/90"
+            className="prose prose-invert max-w-none text-muted-foreground"
             style={{ 
-              color: 'hsl(var(--financial-silver))',
               lineHeight: '1.7'
             }}
           >
-            {/* For now, display as plain text. In production, this would be formatted HTML */}
             <div className="whitespace-pre-wrap">
               {latestRecap.content}
             </div>
           </div>
         </CardContent>
       </Card>
-
-      {/* Portfolio Instructions */}
-      {portfolio.email_instructions && (
-        <Card className="bg-financial-navy/20 border-financial-blue/30">
-          <CardHeader>
-            <CardTitle className="text-financial-blue text-lg">Your Coverage Instructions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-financial-silver/90 leading-relaxed">
-              {portfolio.email_instructions}
-            </p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };

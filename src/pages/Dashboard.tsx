@@ -8,6 +8,7 @@ import { PortfolioSelector } from '@/components/dashboard/PortfolioSelector';
 import { EmailRecapDisplay } from '@/components/dashboard/EmailRecapDisplay';
 import { PortfolioSettings } from '@/components/dashboard/PortfolioSettings';
 import { PortfolioHoldings } from '@/components/dashboard/PortfolioHoldings';
+import { ScoutLogo } from '@/components/ScoutLogo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
@@ -140,7 +141,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-card-secondary to-background">
       <header className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="px-6 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-foreground">Scout Dashboard</h1>
+          <ScoutLogo size="md" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-accent">
@@ -148,7 +149,7 @@ const Dashboard = () => {
                 Account
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-card border-border">
+            <DropdownMenuContent className="bg-card border-border z-50">
               <DropdownMenuItem onClick={handleSignOut} className="text-destructive hover:bg-destructive/10">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign out
@@ -185,6 +186,7 @@ const Dashboard = () => {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-4">
+            <ScoutLogo size="md" />
             <PortfolioSelector 
               portfolios={portfolios}
               selectedPortfolio={selectedPortfolio}
@@ -229,7 +231,7 @@ const Dashboard = () => {
                   Account
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-card border-border">
+              <DropdownMenuContent className="bg-card border-border z-50">
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive hover:bg-destructive/10">
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign out
@@ -244,7 +246,17 @@ const Dashboard = () => {
       <main className="p-6">
         {selectedPortfolio ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 space-y-6">
+              {/* Portfolio Instructions */}
+              {selectedPortfolio.email_instructions && (
+                <div className="bg-card/50 border border-border rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-foreground mb-3">Your Coverage Instructions</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {selectedPortfolio.email_instructions}
+                  </p>
+                </div>
+              )}
+              
               <EmailRecapDisplay 
                 portfolio={selectedPortfolio}
                 latestRecap={latestRecap}
