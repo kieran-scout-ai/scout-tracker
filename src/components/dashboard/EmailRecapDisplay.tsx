@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Mail, Clock, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Mail, Clock, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface Portfolio {
   id: string;
@@ -23,12 +26,46 @@ interface EmailRecap {
 interface EmailRecapDisplayProps {
   portfolio: Portfolio;
   latestRecap: EmailRecap | null;
+  onRecapGenerated?: () => void;
 }
 
 export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
   portfolio,
-  latestRecap
+  latestRecap,
+  onRecapGenerated
 }) => {
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const generateRecap = async () => {
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-portfolio-recap', {
+        body: { portfolio_id: portfolio.id }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Success",
+        description: `Generated new recap: ${data.subject}`,
+      });
+
+      if (onRecapGenerated) {
+        onRecapGenerated();
+      }
+    } catch (error) {
+      console.error('Error generating recap:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate portfolio recap. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
   if (!latestRecap) {
     return (
       <div className="max-w-4xl mx-auto">
@@ -60,9 +97,28 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
                   No Email Recaps Yet
                 </h3>
                 <p className="text-financial-silver/70 max-w-md mx-auto">
-                  Your first {portfolio.email_frequency} recap will be generated soon based on your portfolio holdings and preferences.
+                  Generate your first {portfolio.email_frequency} recap based on your portfolio holdings and preferences.
                 </p>
               </div>
+              
+              <Button 
+                onClick={generateRecap}
+                disabled={isGenerating}
+                className="bg-financial-blue hover:bg-financial-blue/80 text-white"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Generating Recap...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Generate First Recap
+                  </>
+                )}
+              </Button>
+
               {portfolio.email_instructions && (
                 <div className="mt-6 p-4 bg-financial-navy/30 rounded-lg border border-financial-silver/10">
                   <h4 className="text-sm font-medium text-financial-silver mb-2">Your Instructions:</h4>
@@ -110,12 +166,35 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
       {/* Latest Email Recap */}
       <Card className="bg-financial-dark/30 border-financial-silver/20">
         <CardHeader>
-          <CardTitle className="text-financial-silver text-xl">
-            {latestRecap.subject}
-          </CardTitle>
-          <CardDescription className="text-financial-silver/70">
-            Sent on {format(new Date(latestRecap.sent_at), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-financial-silver text-xl">
+                {latestRecap.subject}
+              </CardTitle>
+              <CardDescription className="text-financial-silver/70">
+                Sent on {format(new Date(latestRecap.sent_at), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
+              </CardDescription>
+            </div>
+            <Button 
+              onClick={generateRecap}
+              disabled={isGenerating}
+              variant="outline"
+              size="sm"
+              className="text-financial-blue border-financial-blue/50 hover:bg-financial-blue/10"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Generate New
+                </>
+              )}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div 

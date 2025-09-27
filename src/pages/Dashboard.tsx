@@ -245,6 +245,7 @@ const Dashboard = () => {
           <EmailRecapDisplay 
             portfolio={selectedPortfolio}
             latestRecap={latestRecap}
+            onRecapGenerated={fetchLatestRecap}
           />
         ) : (
           <div className="text-center py-12">
