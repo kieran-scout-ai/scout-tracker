@@ -126,72 +126,42 @@ export const PortfolioHoldings: React.FC<PortfolioHoldingsProps> = ({ portfolioI
           )}
         </CardDescription>
       </CardHeader>
-      <CardContent className="h-[500px]">
-        <ScrollArea className="h-full">
-          <div className="space-y-3">
+      <CardContent className="p-6">
+        <ScrollArea className="h-[400px]">
+          <div className="space-y-2">
             {holdings.map((holding) => (
               <div
                 key={holding.id}
-                className="p-4 border border-border rounded-lg bg-card hover:bg-accent/5 transition-colors"
+                className="flex items-center justify-between p-3 border border-border rounded-lg bg-card hover:bg-accent/5 transition-colors"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <span className="font-semibold text-foreground">{holding.symbol}</span>
-                      {holding.validated ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="h-4 w-4 text-yellow-500" />
-                      )}
-                    </div>
-                    
-                    {holding.name && (
-                      <p className="text-sm text-muted-foreground truncate mb-1">
-                        {holding.name}
-                      </p>
-                    )}
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {holding.sector && (
-                        <Badge variant="secondary" className="text-xs">
-                          {holding.sector}
-                        </Badge>
-                      )}
-                      
-                      {!holding.validated && (
-                        <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-200">
-                          Unvalidated
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="text-right ml-4">
-                    {holding.quantity && (
-                      <div className="text-sm font-medium">
-                        {holding.quantity.toLocaleString()} shares
-                      </div>
-                    )}
-                    
-                    {holding.market_value && (
-                      <div className="text-sm text-muted-foreground">
-                        ${holding.market_value.toLocaleString()}
-                      </div>
-                    )}
-                    
-                    {holding.weight && (
-                      <div className="text-xs text-accent">
-                        {(holding.weight * 100).toFixed(1)}%
-                      </div>
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-semibold text-foreground text-sm">{holding.symbol}</span>
+                    {holding.validated ? (
+                      <CheckCircle className="h-3 w-3 text-green-500" />
+                    ) : (
+                      <AlertCircle className="h-3 w-3 text-yellow-500" />
                     )}
                   </div>
+                  {holding.name && (
+                    <span className="text-sm text-muted-foreground truncate max-w-[200px]">
+                      {holding.name}
+                    </span>
+                  )}
                 </div>
                 
-                {!holding.validated && holding.validation_status && (
-                  <div className="mt-2 text-xs text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded">
-                    {holding.validation_status}
-                  </div>
-                )}
+                <div className="flex items-center space-x-2">
+                  {holding.market_value && (
+                    <span className="text-sm font-medium">
+                      ${holding.market_value.toLocaleString()}
+                    </span>
+                  )}
+                  {holding.weight && (
+                    <Badge variant="secondary" className="text-xs">
+                      {(holding.weight * 100).toFixed(1)}%
+                    </Badge>
+                  )}
+                </div>
               </div>
             ))}
           </div>
