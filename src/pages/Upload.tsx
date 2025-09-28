@@ -86,9 +86,9 @@ const Upload = () => {
 
       setUploadingFile(true);
       
-      // Upload file to storage
+      // Upload file to storage with user-specific path
       const fileExt = file.name.split('.').pop();
-      const fileName = `${portfolio.id}.${fileExt}`;
+      const fileName = `${user.id}/${portfolio.id}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('portfolios')
@@ -104,7 +104,7 @@ const Upload = () => {
 
       if (updateError) throw updateError;
 
-      // Process the uploaded file
+      // Process and verify the uploaded file
       const { error: processError } = await supabase.functions.invoke('process-portfolio-file', {
         body: { 
           portfolio_id: portfolio.id,
@@ -117,6 +117,23 @@ const Upload = () => {
         toast({
           title: "File uploaded but processing failed",
           description: "Your portfolio was created but the file couldn't be processed. You can try uploading again later.",
+          variant: "destructive"
+        });
+      }
+
+      // Trigger holdings verification
+      const { error: verifyError } = await supabase.functions.invoke('verify-holdings', {
+        body: { 
+          portfolio_id: portfolio.id,
+          file_path: fileName
+        }
+      });
+
+      if (verifyError) {
+        console.error('Verification error:', verifyError);
+        toast({
+          title: "Verification warning",
+          description: "Portfolio uploaded successfully but verification encountered issues.",
           variant: "destructive"
         });
       }
