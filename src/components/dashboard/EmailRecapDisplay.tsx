@@ -147,7 +147,7 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
                 </Button>
               ) : (
                 <Button 
-                  onClick={() => navigate('/upload')}
+                  onClick={() => navigate(`/upload-holdings/${portfolio.id}`)}
                   className="bg-accent hover:bg-accent/80 text-accent-foreground"
                 >
                   <Upload className="h-4 w-4 mr-2" />
