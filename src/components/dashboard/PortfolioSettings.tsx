@@ -200,13 +200,13 @@ export const PortfolioSettings: React.FC<PortfolioSettingsProps> = ({
       </div>
 
       {/* Danger Zone */}
-      <Card className="bg-red-950/20 border-red-800/30">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-red-400 flex items-center space-x-2">
+          <CardTitle className="text-red-500 flex items-center space-x-2">
             <Trash2 className="h-5 w-5" />
             <span>Danger Zone</span>
           </CardTitle>
-          <CardDescription className="text-red-300/70">
+          <CardDescription>
             Once you delete a portfolio, there is no going back. Please be certain.
           </CardDescription>
         </CardHeader>
