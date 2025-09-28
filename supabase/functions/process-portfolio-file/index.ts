@@ -9,10 +9,6 @@ const corsHeaders = {
 interface PortfolioHolding {
   symbol: string;
   name?: string;
-  quantity?: number;
-  price?: number;
-  market_value?: number;
-  weight?: number;
   sector?: string;
 }
 
@@ -93,11 +89,6 @@ serve(async (req) => {
       nameIndex = headers.findIndex(h => h.includes('name') || h.includes('security'));
       console.log(`Auto-detected columns: name=${nameIndex}, ticker=${symbolIndex}`);
     }
-    
-    const quantityIndex = headers.findIndex(h => h.includes('quantity') || h.includes('shares'))
-    const priceIndex = headers.findIndex(h => h.includes('price') && !h.includes('market') && !h.includes('cap'))
-    const marketCapIndex = headers.findIndex(h => h.includes('market') && h.includes('cap'))
-    const weightIndex = headers.findIndex(h => h.includes('weight') || h.includes('allocation') || h.includes('%'))
 
     if (symbolIndex === -1) {
       throw new Error('Could not find symbol/ticker column in the uploaded file')
@@ -105,22 +96,7 @@ serve(async (req) => {
 
     const holdings: PortfolioHolding[] = []
 
-    // Helper function to safely parse numeric values
-    const safeParseFloat = (value: string, maxValue: number = 1e15): number | undefined => {
-      if (!value || value === '') return undefined
-      
-      // Remove currency symbols, commas, and whitespace
-      const cleanValue = value.replace(/[$,\s%]/g, '')
-      const parsed = parseFloat(cleanValue)
-      
-      if (isNaN(parsed) || parsed > maxValue || parsed < -maxValue) {
-        return undefined
-      }
-      
-      return parsed
-    }
-
-    // Process each data row
+    // Process each data row - only extract name and ticker
     for (let i = 1; i < lines.length; i++) {
       const row = lines[i].split(',').map(cell => cell.trim())
       
@@ -129,36 +105,10 @@ serve(async (req) => {
       const symbol = row[symbolIndex].toUpperCase()
       const securityInfo = SECURITY_MASTER[symbol as keyof typeof SECURITY_MASTER]
       
-      // Parse weight and convert percentage to decimal if needed
-      let weight: number | undefined
-      if (weightIndex >= 0 && row[weightIndex]) {
-        weight = safeParseFloat(row[weightIndex])
-        // If weight appears to be a percentage (> 1), convert to decimal
-        if (weight && weight > 1) {
-          weight = weight / 100
-        }
-      }
-
-      // Parse market cap safely (in millions/billions)
-      let marketCap: number | undefined
-      if (marketCapIndex >= 0 && row[marketCapIndex]) {
-        marketCap = safeParseFloat(row[marketCapIndex], 1e12) // Max 1 trillion
-      }
-      
       const holding: PortfolioHolding = {
         symbol,
         name: nameIndex >= 0 ? row[nameIndex] : securityInfo?.name,
-        quantity: quantityIndex >= 0 ? safeParseFloat(row[quantityIndex], 1e9) : undefined, // Max 1 billion shares
-        price: priceIndex >= 0 ? safeParseFloat(row[priceIndex], 1e6) : undefined, // Max 1 million per share
-        weight: weight,
-        sector: securityInfo?.sector,
-        market_value: marketCap // Use market cap as market value if available
-      }
-
-      // Only calculate market value from quantity * price if market cap not available
-      if (!holding.market_value && holding.quantity && holding.price) {
-        const calculatedValue = holding.quantity * holding.price
-        holding.market_value = calculatedValue <= 1e15 ? calculatedValue : undefined
+        sector: securityInfo?.sector
       }
 
       holdings.push(holding)
@@ -166,15 +116,11 @@ serve(async (req) => {
 
     console.log(`Parsed ${holdings.length} holdings`)
 
-    // Validate and insert holdings into database
+    // Validate and insert holdings into database - only name, ticker, and sector
     const holdingsToInsert = holdings.map(holding => ({
       portfolio_id,
       symbol: holding.symbol,
       name: holding.name,
-      quantity: holding.quantity,
-      price: holding.price,
-      market_value: holding.market_value,
-      weight: holding.weight,
       sector: holding.sector,
       validated: !!SECURITY_MASTER[holding.symbol as keyof typeof SECURITY_MASTER],
       validation_status: SECURITY_MASTER[holding.symbol as keyof typeof SECURITY_MASTER] 
