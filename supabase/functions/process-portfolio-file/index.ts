@@ -17,6 +17,16 @@ interface PortfolioHolding {
 }
 
 // Mock security master data for validation
+interface ProcessRequest {
+  portfolio_id: string;
+  file_path: string;
+  column_mapping?: {
+    nameColumn: number;
+    tickerColumn: number;
+  } | null;
+}
+
+// Mock security master data for validation
 const SECURITY_MASTER = {
   'AAPL': { name: 'Apple Inc.', sector: 'Technology' },
   'GOOGL': { name: 'Alphabet Inc.', sector: 'Technology' },
@@ -42,7 +52,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { portfolio_id, file_path } = await req.json()
+    const { portfolio_id, file_path, column_mapping } = await req.json() as ProcessRequest;
 
     if (!portfolio_id || !file_path) {
       throw new Error('Missing portfolio_id or file_path')
@@ -69,9 +79,21 @@ serve(async (req) => {
     
     console.log('Headers found:', headers)
 
-    // Find column indices
-    const symbolIndex = headers.findIndex(h => h.includes('symbol') || h.includes('ticker'))
-    const nameIndex = headers.findIndex(h => h.includes('name') || h.includes('security'))
+    // Use user-provided column mapping if available, otherwise auto-detect
+    let symbolIndex: number;
+    let nameIndex: number;
+    
+    if (column_mapping) {
+      nameIndex = column_mapping.nameColumn;
+      symbolIndex = column_mapping.tickerColumn;
+      console.log(`Using user-provided column mapping: name=${nameIndex}, ticker=${symbolIndex}`);
+    } else {
+      // Find column indices by searching headers for keywords
+      symbolIndex = headers.findIndex(h => h.includes('symbol') || h.includes('ticker'));
+      nameIndex = headers.findIndex(h => h.includes('name') || h.includes('security'));
+      console.log(`Auto-detected columns: name=${nameIndex}, ticker=${symbolIndex}`);
+    }
+    
     const quantityIndex = headers.findIndex(h => h.includes('quantity') || h.includes('shares'))
     const priceIndex = headers.findIndex(h => h.includes('price') && !h.includes('market') && !h.includes('cap'))
     const marketCapIndex = headers.findIndex(h => h.includes('market') && h.includes('cap'))
