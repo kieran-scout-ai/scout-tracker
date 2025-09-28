@@ -91,7 +91,7 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
 
   if (!latestRecap) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div>
         <Card className="bg-card/50 border-border">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -162,7 +162,7 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* Portfolio Header */}
       <Card className="bg-card/50 border-border">
         <CardHeader>
