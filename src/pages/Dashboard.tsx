@@ -122,10 +122,12 @@ const Dashboard = () => {
     ));
     setSelectedPortfolio(updatedPortfolio);
     setIsSettingsOpen(false);
-    toast({
-      title: "Success",
-      description: "Portfolio settings updated successfully"
-    });
+  };
+
+  const handlePortfolioDelete = () => {
+    setIsSettingsOpen(false);
+    setSelectedPortfolio(null);
+    fetchPortfolios();
   };
 
   if (loading) {
@@ -210,6 +212,7 @@ const Dashboard = () => {
                   <PortfolioSettings 
                     portfolio={selectedPortfolio}
                     onUpdate={handlePortfolioUpdate}
+                    onDelete={handlePortfolioDelete}
                   />
                 </DialogContent>
               </Dialog>
