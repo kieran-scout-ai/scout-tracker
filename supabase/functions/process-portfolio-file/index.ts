@@ -73,7 +73,8 @@ serve(async (req) => {
     const symbolIndex = headers.findIndex(h => h.includes('symbol') || h.includes('ticker'))
     const nameIndex = headers.findIndex(h => h.includes('name') || h.includes('security'))
     const quantityIndex = headers.findIndex(h => h.includes('quantity') || h.includes('shares'))
-    const priceIndex = headers.findIndex(h => h.includes('price') || h.includes('value'))
+    const priceIndex = headers.findIndex(h => h.includes('price') && !h.includes('market') && !h.includes('cap'))
+    const marketCapIndex = headers.findIndex(h => h.includes('market') && h.includes('cap'))
     const weightIndex = headers.findIndex(h => h.includes('weight') || h.includes('allocation') || h.includes('%'))
 
     if (symbolIndex === -1) {
@@ -81,6 +82,21 @@ serve(async (req) => {
     }
 
     const holdings: PortfolioHolding[] = []
+
+    // Helper function to safely parse numeric values
+    const safeParseFloat = (value: string, maxValue: number = 1e15): number | undefined => {
+      if (!value || value === '') return undefined
+      
+      // Remove currency symbols, commas, and whitespace
+      const cleanValue = value.replace(/[$,\s%]/g, '')
+      const parsed = parseFloat(cleanValue)
+      
+      if (isNaN(parsed) || parsed > maxValue || parsed < -maxValue) {
+        return undefined
+      }
+      
+      return parsed
+    }
 
     // Process each data row
     for (let i = 1; i < lines.length; i++) {
@@ -91,18 +107,36 @@ serve(async (req) => {
       const symbol = row[symbolIndex].toUpperCase()
       const securityInfo = SECURITY_MASTER[symbol as keyof typeof SECURITY_MASTER]
       
+      // Parse weight and convert percentage to decimal if needed
+      let weight: number | undefined
+      if (weightIndex >= 0 && row[weightIndex]) {
+        weight = safeParseFloat(row[weightIndex])
+        // If weight appears to be a percentage (> 1), convert to decimal
+        if (weight && weight > 1) {
+          weight = weight / 100
+        }
+      }
+
+      // Parse market cap safely (in millions/billions)
+      let marketCap: number | undefined
+      if (marketCapIndex >= 0 && row[marketCapIndex]) {
+        marketCap = safeParseFloat(row[marketCapIndex], 1e12) // Max 1 trillion
+      }
+      
       const holding: PortfolioHolding = {
         symbol,
         name: nameIndex >= 0 ? row[nameIndex] : securityInfo?.name,
-        quantity: quantityIndex >= 0 ? parseFloat(row[quantityIndex]) || undefined : undefined,
-        price: priceIndex >= 0 ? parseFloat(row[priceIndex]) || undefined : undefined,
-        weight: weightIndex >= 0 ? parseFloat(row[weightIndex]) || undefined : undefined,
-        sector: securityInfo?.sector
+        quantity: quantityIndex >= 0 ? safeParseFloat(row[quantityIndex], 1e9) : undefined, // Max 1 billion shares
+        price: priceIndex >= 0 ? safeParseFloat(row[priceIndex], 1e6) : undefined, // Max 1 million per share
+        weight: weight,
+        sector: securityInfo?.sector,
+        market_value: marketCap // Use market cap as market value if available
       }
 
-      // Calculate market value if quantity and price are available
-      if (holding.quantity && holding.price) {
-        holding.market_value = holding.quantity * holding.price
+      // Only calculate market value from quantity * price if market cap not available
+      if (!holding.market_value && holding.quantity && holding.price) {
+        const calculatedValue = holding.quantity * holding.price
+        holding.market_value = calculatedValue <= 1e15 ? calculatedValue : undefined
       }
 
       holdings.push(holding)

@@ -127,25 +127,12 @@ Deno.serve(async (req) => {
         verificationResults.warnings.push("No symbol column detected");
       }
       
-      console.log(`Verification complete: ${verificationResults.total_holdings} holdings processed`);
-      
     } catch (parseError: any) {
       verificationResults.status = "error";
       verificationResults.errors.push(`Failed to parse file: ${parseError.message}`);
     }
 
-    // Update portfolio with verification results
-    const { error: updateError } = await supabase
-      .from('portfolios')
-      .update({ 
-        verification_status: verificationResults.status,
-        verification_results: verificationResults
-      })
-      .eq('id', portfolio_id);
-
-    if (updateError) {
-      console.error('Failed to update portfolio verification status:', updateError);
-    }
+    console.log(`Verification complete: ${verificationResults.total_holdings} holdings processed`);
 
     return new Response(
       JSON.stringify({
