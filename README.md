@@ -1,73 +1,166 @@
-# Welcome to your Lovable project
+# Scout Tracker
 
-## Project info
+Portfolio tracking application with FastAPI backend and React frontend. Complete migration from Supabase to self-hosted solution with SQLite database persistence.
 
-**URL**: https://lovable.dev/projects/48800077-9a77-4195-a7b1-57019ae3ebbf
+## 🚀 Features
 
-## How can I edit this code?
+- **Portfolio Management**: Create and manage multiple investment portfolios
+- **CSV Upload**: Upload and process portfolio holdings from CSV files
+- **Real-time Data**: View portfolio holdings with calculated market values
+- **Email Recaps**: Configure automated email updates for portfolio performance
+- **User Authentication**: Secure JWT-based authentication system
+- **Database Persistence**: All data stored in SQLite database with proper relationships
 
-There are several ways of editing your application.
+## 🏗️ Architecture
 
-**Use Lovable**
+**Frontend (React + TypeScript)**
+- React 18 with TypeScript
+- Vite for fast development and building
+- Tailwind CSS with shadcn-ui component library
+- TanStack Query for server state management
+- React Router DOM for navigation
+- React Hook Form with Zod validation
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/48800077-9a77-4195-a7b1-57019ae3ebbf) and start prompting.
+**Backend (FastAPI + SQLite)**
+- FastAPI for high-performance API endpoints
+- SQLite database with SQLAlchemy ORM
+- JWT authentication with bcrypt password hashing
+- File upload processing for CSV imports
+- CORS configured for cross-origin requests
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🛠️ Development Setup
 
-**Use your preferred IDE**
+### Prerequisites
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Node.js 18+ and npm
+- Python 3.8+ and pip
+- Git
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Frontend Setup
 
-Follow these steps:
+```bash
+# Clone the repository
+git clone https://github.com/kieran-scout-ai/scout-tracker.git
+cd scout-tracker
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Install frontend dependencies
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Copy environment file and configure
+cp .env.example .env
+# Edit .env with your API base URL (default: http://127.0.0.1:8000)
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Backend Setup
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+# Navigate to backend directory
+cd backend
 
-**Use GitHub Codespaces**
+# Create virtual environment
+python -m venv venv
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
 
-## What technologies are used for this project?
+# Install Python dependencies
+pip install -r requirements.txt
 
-This project is built with:
+# Copy environment file and configure
+cp .env.example .env
+# Edit .env with your database and JWT settings
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# Start the FastAPI server
+python test_server.py
+```
 
-## How can I deploy this project?
+## 🌐 API Endpoints
 
-Simply open [Lovable](https://lovable.dev/projects/48800077-9a77-4195-a7b1-57019ae3ebbf) and click on Share -> Publish.
+- `GET /` - API health check
+- `POST /auth/register` - User registration
+- `POST /auth/login` - User authentication
+- `GET /api/portfolios/` - List user portfolios
+- `POST /api/portfolios/` - Create new portfolio
+- `POST /api/portfolios/{id}/upload-holdings` - Upload CSV file
+- `POST /api/portfolios/{id}/process-holdings` - Process uploaded holdings
+- `GET /api/portfolios/{id}/holdings` - Get portfolio holdings
+- `GET /api/portfolios/{id}/recaps/latest` - Get latest email recap
 
-## Can I connect a custom domain to my Lovable project?
+## 📊 Database Schema
 
-Yes, you can!
+**Users**
+- id, email, hashed_password, created_at, updated_at
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+**Portfolios**
+- id, name, description, email_frequency, email_instructions, user_id, created_at, updated_at
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+**Portfolio Holdings**
+- id, symbol, name, quantity, price, market_value, weight, sector, portfolio_id, created_at, updated_at
+
+## 🚢 Deployment
+
+### Frontend Deployment
+```bash
+npm run build
+# Deploy the dist/ folder to your hosting platform
+```
+
+### Backend Deployment
+The FastAPI backend can be deployed using:
+- **Docker**: Containerize with the included requirements.txt
+- **Railway/Render**: Direct Python deployment
+- **AWS/GCP/Azure**: Cloud platform deployment
+- **VPS**: Traditional server deployment with nginx
+
+## 🧪 Testing
+
+### End-to-End Testing
+1. Start both frontend and backend servers
+2. Create a new user account
+3. Create a portfolio
+4. Upload a CSV file with holdings
+5. Verify data persistence in database
+
+### API Testing
+```bash
+# Test portfolio creation
+curl -X POST "http://127.0.0.1:8000/api/portfolios/" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Test Portfolio", "description": "Test"}'
+
+# Test file upload
+curl -X POST "http://127.0.0.1:8000/api/portfolios/{id}/upload-holdings" \
+  -F "file=@portfolio.csv"
+```
+
+## 📖 Documentation
+
+- `CLAUDE.md` - Comprehensive project documentation and guidelines
+- `MIGRATION.md` - Details about the Supabase to FastAPI migration
+- `backend/README.md` - Backend-specific setup and API documentation
+
+## 🔐 Security
+
+- JWT tokens for authentication
+- Bcrypt password hashing
+- CORS protection
+- Input validation with Pydantic
+- SQL injection protection with SQLAlchemy ORM
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
