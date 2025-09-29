@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { apiClient } from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,8 +20,7 @@ const Auth = () => {
   }, []);
 
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
+    if (apiClient.isAuthenticated()) {
       navigate('/dashboard');
     }
   };
@@ -31,12 +30,11 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+      const response = await apiClient.register(email, password);
 
-      if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error);
+      }
 
       toast({
         title: "Account created!",
@@ -58,12 +56,11 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const response = await apiClient.login(email, password);
 
-      if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error);
+      }
 
       navigate('/dashboard');
     } catch (error: any) {

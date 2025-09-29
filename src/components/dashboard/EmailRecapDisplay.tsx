@@ -5,24 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Mail, Clock, AlertCircle, Sparkles, Loader2, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { apiClient, type Portfolio, type EmailRecap } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
-interface Portfolio {
-  id: string;
-  name: string;
-  description: string | null;
-  email_instructions: string;
-  email_frequency: string;
-  created_at: string;
-}
-
-interface EmailRecap {
-  id: string;
-  subject: string;
-  content: string;
-  sent_at: string;
-}
 
 interface EmailRecapDisplayProps {
   portfolio: Portfolio;
@@ -45,14 +30,15 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
 
   const checkHoldings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('portfolio_holdings')
-        .select('id')
-        .eq('portfolio_id', portfolio.id)
-        .limit(1);
+      const response = await apiClient.getPortfolioHoldings(portfolio.id);
 
-      if (error) throw error;
-      setHasHoldings(data && data.length > 0);
+      if (response.error) {
+        // If error, assume no holdings
+        setHasHoldings(false);
+        return;
+      }
+
+      setHasHoldings(response.data && response.data.length > 0);
     } catch (error) {
       console.error('Error checking holdings:', error);
     }
@@ -61,17 +47,15 @@ export const EmailRecapDisplay: React.FC<EmailRecapDisplayProps> = ({
   const generateRecap = async () => {
     setIsGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-portfolio-recap', {
-        body: { portfolio_id: portfolio.id }
-      });
+      const response = await apiClient.generateRecap(portfolio.id);
 
-      if (error) {
-        throw error;
+      if (response.error) {
+        throw new Error(response.error);
       }
 
       toast({
         title: "Success",
-        description: `Generated new recap: ${data.subject}`,
+        description: `Generated new recap: ${response.data?.subject}`,
       });
 
       if (onRecapGenerated) {

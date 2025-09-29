@@ -3,28 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { TrendingUp, AlertCircle, CheckCircle, DollarSign } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { apiClient, type PortfolioHolding } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 
-interface Holding {
-  id: string;
-  symbol: string;
-  name: string | null;
-  quantity: number | null;
-  price: number | null;
-  market_value: number | null;
-  weight: number | null;
-  sector: string | null;
-  validated: boolean;
-  validation_status: string | null;
-}
 
 interface PortfolioHoldingsProps {
   portfolioId: string;
 }
 
 export const PortfolioHoldings: React.FC<PortfolioHoldingsProps> = ({ portfolioId }) => {
-  const [holdings, setHoldings] = useState<Holding[]>([]);
+  const [holdings, setHoldings] = useState<PortfolioHolding[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalValue, setTotalValue] = useState(0);
 
@@ -34,19 +22,16 @@ export const PortfolioHoldings: React.FC<PortfolioHoldingsProps> = ({ portfolioI
 
   const fetchHoldings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('portfolio_holdings')
-        .select('*')
-        .eq('portfolio_id', portfolioId)
-        .order('symbol');
+      const response = await apiClient.getPortfolioHoldings(portfolioId);
 
-      if (error) throw error;
+      if (response.error) throw new Error(response.error);
 
-      setHoldings(data || []);
-      
+      const data = response.data || [];
+      setHoldings(data);
+
       // Calculate total portfolio value
-      const total = (data || []).reduce((sum, holding) => {
-        return sum + (holding.market_value || 0);
+      const total = data.reduce((sum, holding) => {
+        return sum + (Number(holding.market_value) || 0);
       }, 0);
       setTotalValue(total);
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { apiClient } from '@/lib/api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,26 +50,21 @@ const UploadHoldings = () => {
   }, [user, portfolioId]);
 
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    if (!apiClient.isAuthenticated()) {
       navigate('/auth');
       return;
     }
-    setUser(session.user);
+    setUser({ id: 'current-user' });
   };
 
   const fetchPortfolio = async () => {
     if (!portfolioId) return;
 
     try {
-      const { data, error } = await supabase
-        .from('portfolios')
-        .select('id, name, description')
-        .eq('id', portfolioId)
-        .single();
+      const response = await apiClient.getPortfolio(portfolioId);
 
-      if (error) throw error;
-      setPortfolio(data);
+      if (response.error) throw new Error(response.error);
+      setPortfolio(response.data!);
     } catch (error) {
       console.error('Error fetching portfolio:', error);
       toast({
@@ -197,51 +192,39 @@ const UploadHoldings = () => {
       setUploadingFile(true);
       
       // Upload file to storage with user-specific path
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${portfolio.id}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('portfolios')
-        .upload(fileName, file, { upsert: true });
+      // Upload file using FastAPI
+      const uploadResponse = await apiClient.uploadPortfolioFile(portfolio.id, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadResponse.error) throw new Error(uploadResponse.error);
+      if (!uploadResponse.data) throw new Error('File upload failed');
 
-      // Update portfolio with file path
-      const { error: updateError } = await supabase
-        .from('portfolios')
-        .update({ file_path: fileName })
-        .eq('id', portfolio.id);
-
-      if (updateError) throw updateError;
-
-      // Process and verify the uploaded file with column mapping
-      const { error: processError } = await supabase.functions.invoke('process-portfolio-file', {
-        body: { 
-          portfolio_id: portfolio.id,
-          file_path: fileName,
-          column_mapping: filePreview ? columnMapping : null
-        }
+      // Update file preview if we got data back
+      setFilePreview({
+        headers: uploadResponse.data.headers,
+        rows: uploadResponse.data.rows,
+        fileName: uploadResponse.data.file_name
       });
 
-      if (processError) {
-        console.error('Processing error:', processError);
-        toast({
-          title: "File uploaded but processing failed",
-          description: "Your holdings file was uploaded but couldn't be processed. You can try uploading again later.",
-          variant: "destructive"
+      // Process the file with column mapping if we have it
+      if (filePreview && (columnMapping.nameColumn !== null || columnMapping.tickerColumn !== null)) {
+        const processResponse = await apiClient.processPortfolioHoldings(portfolio.id, {
+          tickerColumn: columnMapping.tickerColumn!,
+          nameColumn: columnMapping.nameColumn || undefined
         });
-      }
 
-      // Trigger holdings verification
-      const { error: verifyError } = await supabase.functions.invoke('verify-holdings', {
-        body: { 
-          portfolio_id: portfolio.id,
-          file_path: fileName
+        if (processResponse.error) {
+          console.error('Processing error:', processResponse.error);
+          toast({
+            title: "File uploaded but processing failed",
+            description: "Your holdings file was uploaded but couldn't be processed. You can try uploading again later.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Success!",
+            description: `Holdings updated! Processed ${processResponse.data?.holdings_created || 0} holdings.`,
+          });
         }
-      });
-
-      if (verifyError) {
-        console.error('Verification error:', verifyError);
       }
 
       toast({

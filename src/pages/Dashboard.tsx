@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { apiClient, type Portfolio, type EmailRecap } from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Settings, FileText, Plus, LogOut, User } from 'lucide-react';
@@ -12,21 +12,6 @@ import { ScoutLogo } from '@/components/ScoutLogo';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
-interface Portfolio {
-  id: string;
-  name: string;
-  description: string | null;
-  email_instructions: string;
-  email_frequency: string;
-  created_at: string;
-}
-
-interface EmailRecap {
-  id: string;
-  subject: string;
-  content: string;
-  sent_at: string;
-}
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -54,25 +39,22 @@ const Dashboard = () => {
   }, [selectedPortfolio]);
 
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    if (!apiClient.isAuthenticated()) {
       navigate('/auth');
       return;
     }
-    setUser(session.user);
+    setUser({ id: 'current-user' }); // Simplified user object
   };
 
   const fetchPortfolios = async () => {
     try {
-      const { data, error } = await supabase
-        .from('portfolios')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const response = await apiClient.getPortfolios();
 
-      if (error) throw error;
+      if (response.error) throw new Error(response.error);
 
-      setPortfolios(data || []);
-      if (data && data.length > 0 && !selectedPortfolio) {
+      const data = response.data || [];
+      setPortfolios(data);
+      if (data.length > 0 && !selectedPortfolio) {
         setSelectedPortfolio(data[0]);
       }
     } catch (error) {
@@ -91,16 +73,18 @@ const Dashboard = () => {
     if (!selectedPortfolio) return;
 
     try {
-      const { data, error } = await supabase
-        .from('email_recaps')
-        .select('*')
-        .eq('portfolio_id', selectedPortfolio.id)
-        .order('sent_at', { ascending: false })
-        .limit(1);
+      const response = await apiClient.getLatestRecap(selectedPortfolio.id);
 
-      if (error) throw error;
+      if (response.error) {
+        // It's ok if there's no recap yet
+        if (response.error.includes('404')) {
+          setLatestRecap(null);
+          return;
+        }
+        throw new Error(response.error);
+      }
 
-      setLatestRecap(data && data.length > 0 ? data[0] : null);
+      setLatestRecap(response.data || null);
     } catch (error) {
       console.error('Error fetching latest recap:', error);
       toast({
@@ -112,7 +96,7 @@ const Dashboard = () => {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await apiClient.logout();
     navigate('/');
   };
 

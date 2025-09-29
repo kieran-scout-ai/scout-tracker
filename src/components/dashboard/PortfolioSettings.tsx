@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { apiClient, type Portfolio } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -10,14 +10,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from '@/hooks/use-toast';
 import { Save, Mail, Settings2, Trash2 } from 'lucide-react';
 
-interface Portfolio {
-  id: string;
-  name: string;
-  description: string | null;
-  email_instructions: string;
-  email_frequency: string;
-  created_at: string;
-}
 
 interface PortfolioSettingsProps {
   portfolio: Portfolio;
@@ -39,19 +31,14 @@ export const PortfolioSettings: React.FC<PortfolioSettingsProps> = ({
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { data, error } = await supabase
-        .from('portfolios')
-        .update({
-          email_instructions: emailInstructions,
-          email_frequency: emailFrequency
-        })
-        .eq('id', portfolio.id)
-        .select()
-        .single();
+      const response = await apiClient.updatePortfolio(portfolio.id, {
+        email_instructions: emailInstructions,
+        email_frequency: emailFrequency
+      });
 
-      if (error) throw error;
+      if (response.error) throw new Error(response.error);
 
-      onUpdate(data);
+      onUpdate(response.data!);
       toast({
         title: "Success",
         description: "Portfolio settings updated successfully"
@@ -80,25 +67,10 @@ export const PortfolioSettings: React.FC<PortfolioSettingsProps> = ({
 
     setDeleting(true);
     try {
-      // Delete portfolio holdings first (cascading delete should handle this, but being explicit)
-      await supabase
-        .from('portfolio_holdings')
-        .delete()
-        .eq('portfolio_id', portfolio.id);
+      // Delete the portfolio (cascading delete will handle holdings and recaps)
+      const response = await apiClient.deletePortfolio(portfolio.id);
 
-      // Delete email recaps
-      await supabase
-        .from('email_recaps')
-        .delete()
-        .eq('portfolio_id', portfolio.id);
-
-      // Delete the portfolio
-      const { error } = await supabase
-        .from('portfolios')
-        .delete()
-        .eq('id', portfolio.id);
-
-      if (error) throw error;
+      if (response.error) throw new Error(response.error);
 
       toast({
         title: "Success",
